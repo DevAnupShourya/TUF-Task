@@ -1,31 +1,28 @@
-import React, { useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Code, Spinner, Button } from "@nextui-org/react";
-import { useAsyncList } from "@react-stately/data";
+import React, { useEffect, useState } from "react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Code, Spinner } from "@nextui-org/react";
 
 import CodeExecutionCell from "../components/CodeExecutionCell";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Entries() {
   const [isLoading, setIsLoading] = React.useState(true);
-  const [hasMore, setHasMore] = useState(true);
+  const [result, setResult] = useState([]);
 
-  let list = useAsyncList({
-    async load({ signal, cursor }) {
-      const res = await fetch(cursor || `${API_URL}/api/snippet?page=`, { signal });
-      let json = await res.json();
+  async function loadAllSnippets() {
+    setIsLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/api/snippet`);
+      const data = await res.json();
+      setResult(data.snippets)
+    } catch (error) {
+      console.log(error)
+    }
+    setIsLoading(false)
+  }
 
-      if (!cursor) {
-        setIsLoading(false);
-      }
-
-      setHasMore(json.nextPage);
-
-      return {
-        items: json.snippets,
-        cursor: json.hasNextPage ? `${API_URL}/api/snippet?page=${json.nextPage}` : null,
-      };
-    },
-  });
+  useEffect(() => {
+    loadAllSnippets()
+  }, [])
 
 
   return (
@@ -33,16 +30,6 @@ export default function Entries() {
       <Table
         isHeaderSticky
         aria-label="Data of Submissions Uploaded by Students"
-        bottomContent={
-          hasMore && !isLoading ? (
-            <div className="flex w-full justify-center">
-              <Button isDisabled={list.isLoading} variant="flat" onPress={list.loadMore}>
-                {list.isLoading && <Spinner color="white" size="sm" />}
-                Load More
-              </Button>
-            </div>
-          ) : null
-        }
         className="w-11/12 max-md:w-full h-[90vh] mx-auto"
       >
         <TableHeader>
@@ -55,34 +42,33 @@ export default function Entries() {
         </TableHeader>
         <TableBody
           isLoading={isLoading}
-          items={list.items}
+          items={result}
           loadingContent={<Spinner label="Loading..." />}
+          emptyContent={"No rows to display."}
         >
-          {(item) => {
-            return (
-              <TableRow key={item.id}>
-                <TableCell className="text-primary">@{item.username}</TableCell>
-                <TableCell className="capitalize">{item.language_name}</TableCell>
-                <TableCell>
-                  {item.stdin ?
-                    <Code color="success">{item.stdin}</Code> : <Code color="danger">null</Code>
-                  }
-                </TableCell>
-                <TableCell>
-                  {item.source_code ?
-                    <Code color="success">{item.source_code.slice(0, 100)}</Code> : <Code color="danger">null</Code>
-                  }
-                </TableCell>
-                <TableCell>{new Date(item.timestamp).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <CodeExecutionCell
-                    key={`${item.username}-${item.judge0_token}`}
-                    judge0_token={item.judge0_token} />
-                </TableCell>
-              </TableRow>
-            )
-          }}
-
+          {(item) => (
+            <TableRow key={item.id}>
+              <TableCell className="text-primary">@{item.username}</TableCell>
+              <TableCell className="capitalize">{item.language_name}</TableCell>
+              <TableCell>
+                {item.stdin ?
+                  <Code color="success">{item.stdin}</Code> : <Code color="danger">null</Code>
+                }
+              </TableCell>
+              <TableCell>
+                {item.source_code ?
+                  <Code color="success">{item.source_code.slice(0, 100)}</Code> : <Code color="danger">null</Code>
+                }
+              </TableCell>
+              <TableCell>{new Date(item.timestamp).toLocaleDateString()}</TableCell>
+              <TableCell>
+                <CodeExecutionCell
+                  key={`${item.username}-${item.judge0_token}`}
+                  judge0_token={item.judge0_token} />
+              </TableCell>
+            </TableRow>
+          )
+          }
         </TableBody>
       </Table>
     </section>

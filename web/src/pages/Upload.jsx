@@ -21,7 +21,6 @@ export default function Upload() {
       [e.target.name]: e.target.value
     }));
   }
-
   const handleFormSubmission = async () => {
     setIsFormSubmitting(true);
     setSuccessMessage('');
@@ -39,12 +38,11 @@ export default function Upload() {
           language_id: formData.language_code,
           source_code: btoa(formData.code),
           stdin: formData.stdin ? btoa(formData.stdin) : null
-        }),
-        mode: "no-cors"
+        })  
       });
 
       const codeSubmissionData = await codeJudge0SubmissionResponse.json();
-
+      
       if (codeJudge0SubmissionResponse.ok) {
         const snippetSaveResponse = await fetch(`${API_URL}/api/snippet/`, {
           method: 'POST',
@@ -138,7 +136,7 @@ export default function Upload() {
               value={formData.stdin}
               onChange={handleOnInputsChange}
             />
-            
+
             <Textarea
               fullWidth
               label="Code"
@@ -157,7 +155,7 @@ export default function Upload() {
           {successMessage && <p className='text-sm text-success-400 font-semibold'>{successMessage}</p>}
         </CardFooter>
         <CardFooter>
-          <Button variant="shadow" color="primary" onClick={handleFormSubmission} isLoading={isFormSubmitting}>Submit</Button>
+          <Button variant="shadow" color="primary" onClick={handleFormSubmission} isLoading={isFormSubmitting} isDisabled={formData.username === '' | formData.code === '' | formData.language_code === ''}>Submit</Button>
         </CardFooter>
       </Card>
     </section>

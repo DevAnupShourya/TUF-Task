@@ -39,7 +39,8 @@ export default function Upload() {
           language_id: formData.language_code,
           source_code: btoa(formData.code),
           stdin: formData.stdin ? btoa(formData.stdin) : null
-        })
+        }),
+        mode: "no-cors"
       });
 
       const codeSubmissionData = await codeJudge0SubmissionResponse.json();

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // Adjust as needed (e.g., "es2015")
+    "module": "NodeNext", // Or "esnext" for modern modules
+    "strict": false, // Enable stricter type checking
+    "lib": ["dom", "dom.iterable", "esnext"], // Include necessary libraries
+    "allowJs": true, // Allow compiling existing JavaScript files
+    "types": ["node", "@prisma/client"] // Add Prisma client types
+  }
+}
